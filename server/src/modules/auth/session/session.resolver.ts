@@ -3,6 +3,7 @@ import { SessionService } from './session.service'
 import { UserModel } from '@/src/modules/auth/account/models/user.model'
 import { GqlContext } from '@/src/shared/types/gql-context.types'
 import { LoginInput } from '@/src/modules/auth/session/input/login.input'
+import { UserAgent } from '@/src/shared/decorators/user-agent.decorator'
 
 @Resolver('Session')
 export class SessionResolver {
@@ -10,8 +11,12 @@ export class SessionResolver {
 	}
 
 	@Mutation(() => UserModel, { name: 'loginUser' })
-	public async login(@Context() { req }: GqlContext, @Args('data') input: LoginInput) {
-		return this.sessionService.login(req, input)
+	public async login(
+		@Context() { req }: GqlContext,
+		@Args('data') input: LoginInput,
+		@UserAgent() userAgent: string
+	) {
+		return this.sessionService.login(req, input, userAgent)
 	}
 
 	@Mutation(() => Boolean, { name: 'logoutUser' })
