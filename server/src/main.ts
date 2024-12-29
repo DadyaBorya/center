@@ -10,14 +10,24 @@ import { RedisStore } from 'connect-redis'
 import { RedisService } from '@/src/core/redis/redis.service'
 
 async function bootstrap() {
-	const app = await NestFactory.create(CoreModule)
+	const app = await NestFactory.create(CoreModule, { rawBody: true })
 
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
 
+	app.enableCors({
+		origin: config.getOrThrow<string>('ALLOWED_ORIGIN'),
+		credentials: true,
+		exposedHeaders: ['set-cookie']
+	})
+
 	app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
 
-	app.useGlobalPipes(new ValidationPipe({ transform: true }))
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true
+		})
+	)
 
 	app.use(
 		session({
@@ -28,8 +38,12 @@ async function bootstrap() {
 			cookie: {
 				domain: config.getOrThrow<string>('SESSION_DOMAIN'),
 				maxAge: ms(config.getOrThrow<StringValue>('SESSION_MAX_AGE')),
-				httpOnly: parseBoolean(config.getOrThrow<string>('SESSION_HTTP_ONLY')),
-				secure: parseBoolean(config.getOrThrow<string>('SESSION_SECURE')),
+				httpOnly: parseBoolean(
+					config.getOrThrow<string>('SESSION_HTTP_ONLY')
+				),
+				secure: parseBoolean(
+					config.getOrThrow<string>('SESSION_SECURE')
+				),
 				sameSite: 'lax'
 			},
 			store: new RedisStore({
@@ -38,12 +52,6 @@ async function bootstrap() {
 			})
 		})
 	)
-
-	app.enableCors({
-		origin: config.getOrThrow<string>('ALLOWED_ORIGIN'),
-		credentials: true,
-		exposedHeaders: ['set-cookie']
-	})
 
 	await app.listen(config.getOrThrow<number>('APPLICATION_PORT'))
 }

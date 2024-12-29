@@ -28,17 +28,21 @@ export class SessionService {
 		if (!isValidPassword) {
 			throw new UnauthorizedException('Invalid password')
 		}
-
+		console.log(req)
 		return new Promise((resolve, reject) => {
 			req.session.createdAt = new Date()
 			req.session.userId = user.id
 
 			req.session.save(err => {
 				if (err) {
-					return reject(new InternalServerErrorException('Could not save session'))
+					return reject(
+						new InternalServerErrorException(
+							'Could not save session'
+						)
+					)
 				}
 
-				resolve({ user })
+				resolve(user)
 			})
 		})
 	}
