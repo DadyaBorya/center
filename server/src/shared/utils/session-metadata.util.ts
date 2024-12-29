@@ -22,7 +22,7 @@ export function getSessionMetadata(req: Request, userAgent: string): SessionMeta
 
 	return {
 		location: {
-			country: countries.getName(location.country, 'en	') || 'Unknown',
+			country: countries.getName(location.country, 'en') || 'Unknown',
 			city: location.city,
 			latitude: location.ll[0] || 0,
 			longitude: location.ll[1] || 0
